@@ -13,15 +13,23 @@ bool check(User object, User param);
 
 User generate() {
     User res;
-    srandom(time(NULL));
+    srand(time(NULL));
     res.IP = generate_ip();
     res.device = generate_device();
-    res.age = (int) random() % 99 + 1;
-    res.depth = (int) random() % 10 + 1;
+    res.age = (int) rand() % 99 + 1;
+    res.depth = (int) rand() % 10 + 1;
     return res;
 }
 
 void push(ListUser *list, User user) {
+    (list->sum_user)++;
+    if (list->head == NULL) {
+        list->head = malloc(sizeof(NodeUser));
+        list->head->user = user;
+        list->head->next = NULL;
+        count_middle(list);
+        return;
+    }
     NodeUser *tmp = list->head;
     while (tmp->next != NULL) {
         tmp = tmp->next;
@@ -29,7 +37,6 @@ void push(ListUser *list, User user) {
     tmp->next = malloc(sizeof(NodeUser));
     tmp->next->next = NULL;
     tmp->next->user = user;
-    list->sum_user++;
     count_middle(list);
 }
 
@@ -46,10 +53,10 @@ void pop(ListUser *list, User user) {
                 continue;
             }
             prev->next = tmp->next;
+            free(tmp->user.IP);
+            free(tmp->user.device);
             free(tmp);
-            tmp = NULL; //??? вроде всё работает и так, но clion ругается без этого
-            //говорит, что могу ссылаться к освобождённой памяти
-            //хотя, возможно, это баг редактора
+            //tmp = NULL;
             tmp = prev->next;
             continue;
         }
@@ -177,11 +184,11 @@ void print_state(ListUser list) {
 
 char *generate_ip() {
     char *res = malloc(16 * sizeof(char));
-    srandom(time(NULL));
-    int cur_byte = (int) random() % 256;
+    srand(time(NULL));
+    int cur_byte = (int) rand() % 256;
     sprintf(res, "%d", cur_byte);
     for (int i = 1; i < 4; ++i) {
-        cur_byte = (int) random() % 256;
+        cur_byte = (int) rand() % 256;
         sprintf(res, "%s.%d", res, cur_byte);
     }
     sprintf(res, "%s%c", res, '\0');
@@ -189,8 +196,8 @@ char *generate_ip() {
 }
 
 char *generate_device() {
-    srandom(time(NULL));
-    switch ((int) random() % 5) {
+    srand(time(NULL));
+    switch ((int) rand() % 5) {
         case 0:
             return "Windows\0";
         case 1:
@@ -205,6 +212,9 @@ char *generate_device() {
 }
 
 void count_middle(ListUser *list) {
+    if (list->sum_user == 0) {
+        return;
+    }
     int sum_age = 0;
     int sum_deep = 0;
     NodeUser *tmp = list->head;
