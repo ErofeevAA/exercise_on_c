@@ -2,6 +2,8 @@
 #include <time.h>
 #include "operation_shop_struct.h"
 
+void free_cashier_queue(Cashier *cashier);
+
 Customer generate_customer(int max_time) {
     srand(time(0));
     Customer result;
@@ -38,7 +40,16 @@ void pop_customer(Cashier *cashier) {
     (cashier->queue->length)--;
 }
 
-void free_all_queue_customers(Cashier *cashier) {
+void free_all_cashiers_queue(Cashier **cashiers, int length) {
+    Cashier *ptr = *cashiers;
+    free_cashier_queue(ptr);
+    for (int i = 1; i < length; ++i) {
+        ptr++;
+        free_cashier_queue(ptr);
+    }
+}
+
+void free_cashier_queue(Cashier *cashier) {
     NodeCustomer *prev;
     NodeCustomer  *tmp = cashier->queue->head;
     while (tmp != NULL) {
@@ -46,4 +57,6 @@ void free_all_queue_customers(Cashier *cashier) {
         tmp = tmp->next;
         free(prev);
     }
+    free(cashier->queue);
+    cashier->queue = NULL;
 }
