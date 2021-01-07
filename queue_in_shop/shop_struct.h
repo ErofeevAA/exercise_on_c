@@ -7,7 +7,7 @@ typedef struct {
 } Customer;
 
 typedef struct NodeCustomer {
-    Customer visitor;
+    Customer customer;
     struct NodeCustomer *next;
 } NodeCustomer;
 
@@ -19,6 +19,6 @@ typedef struct {
 
 typedef struct {
     bool is_working;
-    int sum_all_customers;
+    int sum_served_customers;
     QueueCustomer *queue;
 } Cashier;
