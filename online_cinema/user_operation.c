@@ -69,19 +69,15 @@ void free_all_list_user(ListUser *list) {
     if (list->head == NULL) {
         return;
     }
-    NodeUser *prev = list->head;
-    NodeUser *tmp = list->head->next;
+    NodeUser *prev;
+    NodeUser *tmp = list->head;
     while (tmp != NULL) {
+        prev = tmp;
+        tmp = tmp->next;
         free(prev->user.login);
         free(prev->user.password);
         free(prev);
-        prev = NULL;
-        prev = tmp;
-        tmp = tmp->next;
     }
-    free(prev->user.login);
-    free(prev->user.password);
-    free(prev);
 }
 
 User search_user(ListUser list, char *login, char *password) {
