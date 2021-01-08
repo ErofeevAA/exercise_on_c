@@ -43,6 +43,10 @@ void init_model() {
     noecho();
     curs_set(0);
     keypad(stdscr, true);
+    // halfdelay(n) меняет функцию getch()
+    // после вызова первой, вторая ждёт n/10 секунд и
+    // если пользователь не проявил активность
+    // возвращает значение ошибки
     halfdelay(10);
     draw_head();
     model();
@@ -51,6 +55,7 @@ void init_model() {
 }
 
 void destroy_model() {
+    // отключает halfdelay() режим
     cbreak();
     draw_stop();
     getch();
@@ -119,6 +124,7 @@ void pop_customers() {
     }
 }
 
+//без этих макросов CLion пристаёт, что fscanf не выбрасывает сообщение об ошибке
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "cert-err34-c"
 void init_settings() {
