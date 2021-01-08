@@ -1,12 +1,30 @@
 #include <ncurses.h>
 #include "draw.h"
-#include "coords.h"
+
+int y_cashier = 1;
+int y_time;
+int y_next_customers;
+int y_sum_customers;
+int y_working_cashiers;
+int y_sum_served_customers;
+int y_max_length_queue_cashier;
+
+void init_coords(int max_queue_length) {
+    int y_cur = 2 + max_queue_length + y_cashier;
+    y_time = y_cur++;
+    y_next_customers = y_cur++;
+    y_sum_customers = y_cur++;
+    y_working_cashiers = y_cur++;
+    y_sum_served_customers = y_cur++;
+    y_max_length_queue_cashier = y_cur;
+}
 
 void draw_cashier(int item, int max_items, Cashier cashier);
 
 void draw_head() {
-    printw("Supermarket \"Hoof In The Snout\".");
-    printw("Queue modeling system");
+    printw("Supermarket \"Hoof In The Snout\". ");
+    printw("Queue modeling system.");
+    refresh();
 }
 
 void draw_all_cashiers(int max_items, int sum_cashiers, Cashier *cashiers) {
@@ -22,19 +40,17 @@ void draw_time(int time) {
     refresh();
 }
 
-void draw_next_customers(int num, Customer c1, ...) {
+void draw_next_customers(int length, Customer *customers) {
     move(y_next_customers, 0);
     clrtoeol();
-    printw("Next customers: ");
-    if (num == 0) {
-        printw("Nobody");
+    printw("Next customers:");
+    if (length == 0) {
+        printw(" Nobody");
         refresh();
         return;
     }
-    Customer *pointer = &c1;
-    for (int i = 0; i < num; ++i) {
-        printw("%c%d", pointer->name, pointer->time);
-        pointer++;
+    for (int i = 0; i < length; ++i) {
+        printw(" %c%d", customers[i].name, customers[i].time);
     }
     refresh();
 }
@@ -69,17 +85,16 @@ void draw_max_queue_cashier_length(int max) {
 
 void draw_cashier(int item, int max_items, Cashier cashier) {
     int y_cur = y_cashier;
-    int x = (item + 1) * 2 - 1;
-    mvprintw(y_cur++, x, "%d", item + 1);
-    mvprintw(y_cur++, x, "%d", cashier.sum_served_customers);
-    (cashier.is_working) ? mvprintw(y_cur++, x, "+") : mvprintw(y_cur++, x, "-");
+    int x = (item + 1) * 6 - 5;
+    mvprintw(y_cur++, x + 1, "%d", item + 1);
+    (cashier.is_working) ? mvprintw(y_cur++, x + 1, "+") : mvprintw(y_cur++, x + 1, "-");
     NodeCustomer *tmp = cashier.queue->head;
     for (int i = 0; i < max_items; ++i) {
         for (; tmp != NULL; ++i) {
-            mvprintw(y_cur + i, x, "%c%d", tmp->customer.name, tmp->customer.time);
+            mvprintw(y_cur + i, x, "%c %d", tmp->customer.name, tmp->customer.time);
             tmp = tmp->next;
         }
-        mvprintw(y_cur + i, x, "||");
+        mvprintw(y_cur + i, x, "| |");
     }
     refresh();
 }
