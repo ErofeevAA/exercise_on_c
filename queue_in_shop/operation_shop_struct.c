@@ -5,7 +5,6 @@
 void free_cashier_queue(Cashier *cashier);
 
 Customer generate_customer(int max_time) {
-    srand(time(0));
     Customer result;
     result.name = (char) (rand() % 24 + 97);
     result.time = rand() % max_time + 1;
@@ -13,11 +12,8 @@ Customer generate_customer(int max_time) {
 }
 
 void push_customer(Cashier *cashier, Customer customer) {
-    if (cashier->queue == NULL) {
-        cashier->queue = malloc(sizeof(QueueCustomer));
-        cashier->queue->length = 0;
-    }
     if (cashier->queue->length == 0) {
+        cashier->is_working = true;
         cashier->queue->head = malloc(sizeof(NodeCustomer));
         cashier->queue->length = 1;
         cashier->queue->head->customer = customer;
@@ -29,6 +25,7 @@ void push_customer(Cashier *cashier, Customer customer) {
     tmp->next = malloc(sizeof(NodeCustomer));
     tmp->next->customer = customer;
     tmp->next->next = NULL;
+    tmp = tmp->next;
     cashier->queue->tail = tmp;
     (cashier->queue->length)++;
 }
@@ -38,6 +35,11 @@ void pop_customer(Cashier *cashier) {
     free(cashier->queue->head);
     cashier->queue->head = tmp;
     (cashier->queue->length)--;
+    (cashier->sum_served_customers)++;
+    if (cashier->queue->head == NULL) {
+        cashier->queue->tail = NULL;
+        cashier->is_working = false;
+    }
 }
 
 void free_all_cashiers_queue(Cashier **cashiers, int length) {
