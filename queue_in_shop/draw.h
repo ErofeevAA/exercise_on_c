@@ -4,7 +4,7 @@ void init_coords(int max_queue_length);
 
 void draw_head();
 
-void draw_all_cashiers(int max_items, int sum_cashiers, Cashier *cashiers);
+void draw_all_cashiers(int max_queue_length, int sum_cashiers, Cashier *cashiers);
 
 void draw_time(int time);
 
@@ -17,3 +17,5 @@ void draw_sum_working_cashiers(int sum, int max);
 void draw_sum_served_customers(int sum);
 
 void draw_max_queue_cashier_length(int max);
+
+void draw_stop();

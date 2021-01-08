@@ -6,7 +6,7 @@
 #include "operation_shop_struct.h"
 
 static int max_customer_time;
-static int max_cashier_queue_length;
+static int max_queue_length;
 static int max_sum_cashiers;
 static int max_next_customers;
 
@@ -33,9 +33,11 @@ int sum_customers_in_queue();
 int sum_served_customers();
 int sum_working_cashier();
 
+bool is_overflow();
+
 void init_model() {
     init_settings();
-    init_coords(max_cashier_queue_length);
+    init_coords(max_queue_length);
     init_cashiers();
     initscr();
     noecho();
@@ -44,11 +46,14 @@ void init_model() {
     halfdelay(10);
     draw_head();
     model();
-    draw_max_queue_cashier_length(max_cashier_queue_length);
+    draw_max_queue_cashier_length(max_queue_length);
     controller();
 }
 
 void destroy_model() {
+    cbreak();
+    draw_stop();
+    getch();
     free_all_cashiers_queue(&g_cashiers, max_sum_cashiers);
     free(g_cashiers);
     free(g_next_customers);
@@ -61,6 +66,9 @@ void controller() {
     while (key != KEY_ESC) {
         g_time++;
         model();
+        if (is_overflow()) {
+            break;
+        }
         key = getch();
     }
 }
@@ -71,9 +79,9 @@ void model() {
         push_customers();
     }
     srand(time(0));
-    g_length_next_customers = rand() % max_cashier_queue_length;
+    g_length_next_customers = rand() % (max_next_customers + 1);
     regenerate_customers();
-    draw_all_cashiers(max_cashier_queue_length, max_sum_cashiers, g_cashiers);
+    draw_all_cashiers(max_queue_length, max_sum_cashiers, g_cashiers);
     draw_time(g_time);
     draw_next_customers(g_length_next_customers, g_next_customers);
     draw_sum_customers(sum_customers_in_queue());
@@ -85,7 +93,7 @@ void push_customers() {
     int l = 0;
     Cashier *ptr = g_cashiers;
     for (int i = 0; i < max_sum_cashiers; ++i) {
-        for (int j = ptr->queue->length; l < g_length_next_customers && j < max_cashier_queue_length; ++j) {
+        for (int j = ptr->queue->length; l < g_length_next_customers && j < max_queue_length; ++j) {
             push_customer(ptr, g_next_customers[l]);
             l++;
         }
@@ -122,7 +130,7 @@ void init_settings() {
     fscanf(file, "%d", &max_customer_time);
     fscanf(file, "%s", word);
     fscanf(file, "%s", word);
-    fscanf(file, "%d", &max_cashier_queue_length);
+    fscanf(file, "%d", &max_queue_length);
     fscanf(file, "%s", word);
     fscanf(file, "%s", word);
     fscanf(file, "%d", &max_sum_cashiers);
@@ -177,4 +185,13 @@ int sum_working_cashier() {
         res += g_cashiers[i].is_working;
     }
     return res;
+}
+
+bool is_overflow() {
+    int sum = 0;
+    int max_sum = max_queue_length * max_sum_cashiers;
+    for (int i = 0; i < max_sum_cashiers; ++i) {
+        sum += g_cashiers[i].queue->length;
+    }
+    return (sum == max_sum) ? true : false;
 }
