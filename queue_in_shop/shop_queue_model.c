@@ -159,6 +159,7 @@ void init_cashiers() {
 }
 
 void regenerate_customers() {
+    free(g_next_customers);
     if (g_length_next_customers == 0) {
         g_next_customers = NULL;
         return;
